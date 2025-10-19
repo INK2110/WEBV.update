@@ -61,6 +61,10 @@ router.get("/main/myHistory", requireAuth , (req, res) => {
   return res.sendFile(filePath);
 });
 
+router.get("/main/admin", requireAuth , (req,res) => {
+  const filePath = path.join(__dirname, "../../public/page/dashboard.html");
+  return res.sendFile(filePath);
+});
 
 router.get("/main/users/data",requireAuth, getUser);
 

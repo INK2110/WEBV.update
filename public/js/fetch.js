@@ -496,40 +496,59 @@ document.addEventListener('DOMContentLoaded',async () => {
     });
   }
 
-    const navbarNav = document.getElementById("navbarNav");
-    const btnWork = document.getElementById("btnWork");
-    if(navbarNav) {
-        axios.get("/main/users/data")
-        .then(res => {
-            user = res.data
-            const fullname = document.getElementById("firstname");
-            if (fullname) fullname.textContent = user.fullname || "ไม่ระบุชื่อ";
+const navbarNav = document.getElementById("navbarNav");
+const btnWork = document.getElementById("btnWork");
 
-            const menus = ["menu-home", "menu-totalproblem", "menu-mywork", "menu-myReportedHistory", "menu-myworkhistory"];
-            menus.forEach(id => {
-            const navbar = document.getElementById(id);
+if (navbarNav) {
+  axios.get("/main/users/data")
+    .then(res => {
+      const user = res.data;
+      const fullname = document.getElementById("firstname");
+      if (fullname) fullname.textContent = user.fullname || "ไม่ระบุชื่อ";
 
-            if (navbar) navbar.style.display = "none";
+      // ซ่อนเมนูทั้งหมดก่อน
+      const menus = ["menu-home", "menu-totalproblem", "menu-mywork", "menu-myReportedHistory", "menu-myworkhistory", "menu-dashboard" , "menu-Admin-actions"];
+      menus.forEach(id => {
+        const navbar = document.getElementById(id);
+        if (navbar) navbar.style.display = "none";
+      });
+
+      // --- เงื่อนไขแยกแต่ละ role --- //
+      if (user.rolename === "User") {
+        // เฉพาะผู้ใช้ทั่วไป
+        ["menu-home", "menu-totalproblem", "menu-myReportedHistory"].forEach(id => {
+          const navbar = document.getElementById(id);
+          if (navbar) navbar.style.display = "flex";
         });
+        if (btnWork) btnWork.style.display = "none";
+        console.log("Role: User");
+      }
 
-        if (user.rolename === "User") {
-            ["menu-home", "menu-totalproblem", "menu-myReportedHistory"].forEach(id => {
-            const navbar = document.getElementById(id);
-            if (navbar) navbar.style.display = "flex";
-            if(btnWork) btnWork.style.display = "none";
-            console.log(id);
-            });
-        } else if (user.rolename === "Admin" || user.rolename === "Technician") {
-            ["menu-home", "menu-totalproblem", "menu-mywork", "menu-myworkhistory"].forEach(id => {
-            const navbar = document.getElementById(id);
-            if (navbar) navbar.style.display = "flex";
-            });
-        } else {
-            console.warn("ไม่พบ role ที่ตรงกับผู้ใช้:", user.roleid);
-        }
-        })
-        .catch(err => console.error("Error loading user info:", err));
-    }
+      else if (user.rolename === "Technician") {
+        // ช่างเทคนิคเห็นบางเมนู
+        ["menu-home", "menu-totalproblem", "menu-mywork", "menu-myworkhistory"].forEach(id => {
+          const navbar = document.getElementById(id);
+          if (navbar) navbar.style.display = "flex";
+        });
+        console.log("Role: Technician");
+      }
+
+      else if (user.rolename === "Admin") {
+        // แอดมินเห็นอีกแบบ เช่นมีหน้า Admin Panel เพิ่ม
+        ["menu-dashboard", "menu-totalproblem" , "menu-Admin-actions"].forEach(id => {
+          const navbar = document.getElementById(id);
+          if (navbar) navbar.style.display = "flex";
+        });
+        console.log("Role: Admin");
+      }
+
+      else {
+        console.warn("ไม่พบ role ที่ตรงกับผู้ใช้:", user.rolename);
+      }
+    })
+    .catch(err => console.error("Error loading user info:", err));
+}
+
  
     //ปุ่มเลือกสถานะ
     // const tableBody = document.getElementById("problemTable");

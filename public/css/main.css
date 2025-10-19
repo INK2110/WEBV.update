@@ -47,15 +47,16 @@ body {
     background-color: rgb(27, 255, 27);
 }
 
-
+/* ช่องสวัสดี  */
 .user-info-box {
-    background-color: rgb(235, 166, 131);
+    background-color: rgb(218, 131, 89);
     border-radius: 10px;
     
 }
 
+/* แจ้งปัญหา */
 .notification-card {
-    background-color: rgb(233, 78, 78);
+    background-color:rgb(218, 131, 89);
     border-radius: 10px;
 }
 
