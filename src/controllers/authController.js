@@ -57,7 +57,11 @@ export const login = async (req, res) => {
     const filePath = path.join(__dirname, "../../public/page/newPassword.html");
     return res.sendFile(filePath);
   }
-  return res.redirect("/main");
+  if (u.rolename === "Admin") {
+      return res.redirect("/main/admin");
+    } else {
+      return res.redirect("/main");
+    }
   } catch (e) {
     console.error(e);
     res.status(500).send("เกิดข้อผิดพลาดภายในระบบ");
