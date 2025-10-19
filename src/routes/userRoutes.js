@@ -2,7 +2,7 @@
 import express from "express";
 import bodyParser from "body-parser";
 import { getUsers, getUser , getTechHome , getuserHome , getadminHome} from "../controllers/usersController.js";
-import {getMyHistory,getLatestWorkAssignment,updateProblem ,cancelWorkAssignment,getProblemlist ,getProblemlastest, getMyWorkAssignment ,getMyWorkHistory, addProblem, checkSession, getCategory, getPriority, getDepartment,acceptWorkAssignment} from "../controllers/problemController.js";
+import {getMyHistory,getLatestWorkAssignment,updateProblem ,cancelWorkAssignment,getProblemlist ,getProblemlastest, getMyWorkAssignment ,getMyWorkHistory, addProblem, checkSession, getCategory, getPriority,getStatus,getAssignedUser, getDepartment,acceptWorkAssignment} from "../controllers/problemController.js";
 import { changePassword, login , logout } from "../controllers/authController.js";
 import { dirname } from "path";
 import path from "path";
@@ -86,6 +86,12 @@ router.get("/main/department",requireAuth,getDepartment);
 
 //GET priority
 router.get("/main/priority" ,requireAuth,getPriority); 
+
+//GET status
+router.get("/main/status" ,requireAuth,getStatus); 
+
+// ดึงชื่อผู้รับผิดชอบของปัญหา
+router.get("/main/assigned:problemId" ,requireAuth,requireRole('Admin'),getAssignedUser);
 
 // POST /api/add-problem
 router.post("/add-problem", requireAuth, addProblem);

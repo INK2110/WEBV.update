@@ -270,6 +270,32 @@ export const getPriority = async (req, res) => {
     }
 };
 
+export const getStatus = async (req,res) => {
+  try {
+      const result = await pool.query("SELECT statusid, statusstate FROM status");
+        console.log(result.rows);
+      res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+      res.status(500).json({ error: "เกิดข้อผิดพลาด" });
+    }
+};
+
+export const getAssignedUser = async (req, res) => {
+  try {
+    const problemId = req.params.problemId;
+    const sql = `
+      select CONCAT(u.firstname ,' ', u.lastname) AS assignby
+        FROM users u
+        Join workassignment wk on u.usersid = wk.usersid
+        where wk.problemid = $1 ;
+    `;
+    const result = await pool.query(sql, [problemId]);
+  } catch (err) {
+    console.error("Error fetching technicians:", err);
+    res.status(500).json({ error: "เกิดข้อผิดพลาดในการดึงผู้รับผิดชอบ" });
+  }
+};
 
 export const acceptWorkAssignment = async (req, res) => {
   const problemid = req.params.id;
@@ -373,3 +399,17 @@ export const updateProblem = async (req, res) => {
       res.status(500).json({ success: false, message: "Database error" });
     }
 };
+
+// export const getDropdownWorker = async (req,res) => {
+//     try {
+//       const problemId = req.params.problemId;
+//       const result = await pool.query(
+//         select CONCAT(u.firstname ,' ', u.lastname) AS assignby
+//         FROM users u
+//         Join workassignment wk on u.usersid = wk.usersid
+//         where wk.problemid = $1 ;
+//         ,[problemId]);
+//     } catch (error) {
+//       res.status(500).json({ success: false, message: "Database error" });
+//     }
+// }

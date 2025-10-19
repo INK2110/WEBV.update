@@ -120,7 +120,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 
             });
 
-            
+            axios.get(`/getAssignedUser/${data.problemId}`)
+            .then(res => {
+                 data.assignby = res.data;
+                // console.log(data23);
+            }).catch(error => {
+                console.log("Getting worker Error" , error);
+            })
+
             
             
             
@@ -340,18 +347,122 @@ document.addEventListener('DOMContentLoaded', function() {
     
 }); // ปิด DOMContentLoaded
 
+// ฟังก์ชันเปิด modal และดึงข้อมูลปัญหา
+function openProblemDetail(problemData) {
+    selectedProblemId = problemData.problemid; // เก็บ id ไว้ใช้ update
+    const modal = new bootstrap.Modal(document.getElementById('problemDetailModal'));
+    modal.show();
 
+    // ถ้าเป็น Admin ให้โหลด dropdown
+    if (window.userRole === "Admin") {
+        document.getElementById("adminEditSection").style.display = "block";
+
+        loadAdminDropdowns(problemData);
+    } else {
+        document.getElementById("adminEditSection").style.display = "none";
+    }
+}
+
+// ฟังก์ชันโหลด dropdown ของ admin
+ function loadAdminDropdowns(problemData) {
+  console.log("กำลังโหลด dropdowns...");
+
+  // 🔹 โหลดผู้รับผิดชอบ
+  const assignDropdown = document.getElementById("assignDropdown");
+  if (assignDropdown) {
+    assignDropdown.innerHTML = ""; // เคลียร์ของเดิม
+    const assignby = problemData.assignby;
+    console.log(assignby);
+    // axios.get("/main/assigned:problemId")
+    //   .then(res => {
+    //     const users = res.data;
+    //     users.forEach(user => {
+    //       const option = document.createElement("option");
+    //       option.value = user.usersid;
+    //       option.textContent = user.fullname;
+    //       if (problemData.assignid == user.usersid) option.selected = true;
+    //       assignDropdown.appendChild(option);
+    //     });
+    //     console.log("โหลดผู้รับผิดชอบสำเร็จ:", users);
+    //   })
+    //   .catch(err => console.error("โหลดผู้รับผิดชอบผิดพลาด:", err));
+  }
+
+  // 🔹 โหลดสถานะ
+  const statusDropdown = document.getElementById("statusDropdown");
+  console.log("statusDropdown =", statusDropdown);
+  if (statusDropdown) {
+    let loadedstatus = false;
+    statusDropdown.addEventListener("click", () => {
+      if (loadedstatus) return;
+
+      axios.get("/main/status")
+      .then(res => {
+        const statuses = res.data;
+        console.log(statuses);
+        statuses.forEach(status => {
+          const option = document.createElement("option");
+          option.value = status.statusid;
+          option.textContent = status.statusstate;
+          // if (problemData.statusid == status.statusid) option.selected = true;
+          statusDropdown.appendChild(option);
+        });
+        loadedstatus = true;
+        console.log("โหลดสถานะสำเร็จ:", statuses);
+      })
+      .catch(err => console.error("โหลดสถานะผิดพลาด:", err));
+    });
+    loadedstatus();
+    // statusDropdown.innerHTML = ""; // เคลียร์ของเดิม
+    
+  }
+}
+
+
+
+// ปุ่มบันทึก admin
+document.getElementById("saveAdminEdit").addEventListener("click", () => {
+    if (!selectedProblemId) return alert("ไม่พบ Problem ID");
+
+    const data = {
+        problemid: selectedProblemId,
+        assignid: document.getElementById("assignDropdown").value,
+        statusid: document.getElementById("statusDropdown").value,
+        priorityid: document.getElementById("priorityDropdown").value
+    };
+
+    axios.post("/main/admin/updateProblem", data)
+        .then(res => {
+            if(res.data.success){
+                alert("แก้ไขเรียบร้อย");
+                location.reload(); // หรือเรียก fetch table ใหม่
+            } else {
+                alert("เกิดข้อผิดพลาด: " + res.data.message);
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+        });
+});
 // ===================================
 // 4. ฟังก์ชันเปิด Modal (ใช้ Bootstrap)
 // ===================================
 window.openProblemDetail = function(problemData) {
     const modalElement = document.getElementById('problemDetailModal');
+    if (!modalElement) return;
+
+    // แสดง admin section
+    document.getElementById("adminEditSection").style.display = "block";
+
+    // โหลด dropdown ตอน modal เปิดแล้ว
+    loadAdminDropdowns(problemData);
+
     const acceptBtn = document.getElementById("acceptButton");
     const workUpdatebtn = document.getElementById("workUpdatebtn");
     const workCancelbtn = document.getElementById("workCancelbtn");
     const workFinishbtn = document.getElementById("workFinishbtn"); 
 
-    
     
     // เช็คว่า Modal มีอยู่จริง
     if (!modalElement) {
@@ -416,10 +527,18 @@ window.openProblemDetail = function(problemData) {
         creadtedByDepartmentElement.textContent = problemData.department || '-';
     if (createdLocationElement)
         createdLocationElement.textContent = problemData.location || '-';
-
-    // เปิด Modal
     
+    // เปิด Modal
+   
+    // const adminEditSection = document.getElementById("adminEditSection");
+    //     if(adminEditSection){
+    //         adminEditSection.style.display = "block";
+    //     }
+    // loadAdminDropdowns(problemData);
+
     modal.show();
+
+   
 };
 
 
