@@ -229,6 +229,22 @@ export const addProblem = async (req, res) => {
   } 
 
 };
+//====================/
+export const adduser = async (req,res) => {
+  try {
+    const { firstname, lastname, email, password, teamId, roleId } = req.body;
+    const createat = new Date();// เวลาปัจจุบัน
+    const result = await pool.query(`
+      INSERT INTO users (firstname, lastname, usersemail, password, teamid, roleid,createat)
+      VALUES ($1, $2, $3,crypt($4, gen_salt('bf')), $5, $6,NOW())
+      RETURNING *;
+    `, [firstname, lastname, email, password, teamId, roleId]);
+    res.json({ success: true, userId: result.rows[0].id });
+  } catch (err) {
+    console.error("❌ Error inserting user:", err);
+    res.json({ success: false, message: err.message });
+  }
+};
 
 export const checkSession = (req, res) => {
   if (req.session && req.session.user) {
@@ -280,21 +296,27 @@ export const getStatus = async (req,res) => {
       res.status(500).json({ error: "เกิดข้อผิดพลาด" });
     }
 };
-// หก่ฟกฟสากฟวส
-export const getAssignedUser = async (req, res) => {
+
+export const getTeam = async (req,res) => {
   try {
-    const problemId = req.params.problemId;
-    const sql = `
-      select CONCAT(u.firstname ,' ', u.lastname) AS assignby
-        FROM users u
-        Join workassignment wk on u.usersid = wk.usersid
-        where wk.problemid = $1 ;
-    `;
-    const result = await pool.query(sql, [problemId]);
-  } catch (err) {
-    console.error("Error fetching technicians:", err);
-    res.status(500).json({ error: "เกิดข้อผิดพลาดในการดึงผู้รับผิดชอบ" });
-  }
+      const result = await pool.query("SELECT teamid, teamname FROM teams");
+        console.log(result.rows);
+      res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+      res.status(500).json({ error: "เกิดข้อผิดพลาด" });
+    }
+};
+
+export const getRole = async (req,res) => {
+  try {
+      const result = await pool.query("SELECT roleid, rolename FROM role");
+        console.log(result.rows);
+      res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+      res.status(500).json({ error: "เกิดข้อผิดพลาด" });
+    }
 };
 
 export const acceptWorkAssignment = async (req, res) => {

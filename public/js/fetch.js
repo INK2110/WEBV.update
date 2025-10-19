@@ -1,6 +1,5 @@
-console.log("✅ fetch.js loaded");
+console.log("🔍 กำลังโหลดข้อมูล /main/adminaction...");
 document.addEventListener('DOMContentLoaded',async () => {    
-  console.log("✅ fetch.js loaded");
   let allData = [];
   
     const page_problem_Container = document.getElementById('page-problem-content');
@@ -42,6 +41,41 @@ document.addEventListener('DOMContentLoaded',async () => {
       });
     }
   
+    const page_AdminDB_content = document.getElementById('page-AdminDB-content');
+    if(page_AdminDB_content){
+    axios.get("/main/adminaction")
+      .then(res => {
+      
+        data = res.data;
+        
+        // console.log(data);
+        const table = document.getElementById("ActionTable");
+        
+        table.innerHTML = "";
+
+        data.forEach(row => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${row.usersid}</td>
+            <td>${row.usersemail}</td>
+            <td>${row.firstname}</td>
+            <td>${row.lastname}</td>
+            <td>${row.teamname}</td>
+            <td>${row.departmentname || "-"}</td>
+            <td>${row.phonenumber || "-"}</td>
+          `;
+          table.appendChild(tr);
+        });
+      })
+      .catch(err => {
+        if (err.response?.status === 401) {
+          console.error("Unauthorized! Please login first.");
+        } else {
+          console.error("Error fetching Actions:", err);
+        }
+      });
+  }
+
     
   const page_myWorkassignment_content = document.getElementById('page-myWorkassignment-content');
   if(page_myWorkassignment_content) {
@@ -500,6 +534,48 @@ document.addEventListener('DOMContentLoaded',async () => {
     });
   }
 
+  const dropdownteam = document.getElementById("teamDropdown");
+  if(dropdownteam){ 
+    let loadedteam = false;
+    dropdownteam.addEventListener("click", () => {
+      if (loadedteam) return;
+
+      axios.get("/main/teams")
+        .then(res => {
+          data = res.data;
+          data.forEach(teams => {
+            const option = document.createElement("option");
+            option.value = teams.teamid;
+            option.textContent = teams.teamname;
+            dropdownteam.appendChild(option);
+          });
+          loadedteam = true;
+        })
+        .catch(err => console.error(err));
+    });
+  }
+
+  const dropdownrole = document.getElementById("roleDropdown");
+  if(dropdownrole){ 
+    let loadedrole = false;
+    dropdownrole.addEventListener("click", () => {
+      if (loadedrole) return;
+
+      axios.get("/main/role")
+        .then(res => {
+          data = res.data;
+          data.forEach(role => {
+            const option = document.createElement("option");
+            option.value = role.roleid;
+            option.textContent = role.rolename;
+            dropdownrole.appendChild(option);
+          });
+          loadedrole = true;
+        })
+        .catch(err => console.error(err));
+    });
+  }
+
     const navbarNav = document.getElementById("navbarNav");
     const btnWork = document.getElementById("btnWork");
 
@@ -530,7 +606,7 @@ if (navbarNav) {
       }
 
       else if (user.rolename === "Technician") {
-        // ช่างเทคนิคเห็นบางเมนู
+        // ช่างเทคนิค
         ["menu-home", "menu-totalproblem", "menu-mywork", "menu-myworkhistory"].forEach(id => {
           const navbar = document.getElementById(id);
           if (navbar) navbar.style.display = "flex";
@@ -539,7 +615,7 @@ if (navbarNav) {
       }
 
       else if (user.rolename === "Admin") {
-        // แอดมินเห็นอีกแบบ เช่นมีหน้า Admin Panel เพิ่ม
+        // แอดมิน
         ["menu-dashboard", "menu-totalproblem" , "menu-Admin-actions"].forEach(id => {
           const navbar = document.getElementById(id);
           if (navbar) navbar.style.display = "flex";
@@ -555,106 +631,51 @@ if (navbarNav) {
     .catch(err => console.error("Error loading user info:", err));
 }
 
-    let selectedProblemId = null; // เก็บ problem id ตอนเปิด modal
 
-// // ฟังก์ชันเปิด modal และดึงข้อมูลปัญหา
-// function openProblemDetail(problemData) {
-//     selectedProblemId = problemData.problemid; // เก็บ id ไว้ใช้ update
-//     const modal = new bootstrap.Modal(document.getElementById('problemDetailModal'));
-//     modal.show();
+    //เพิ่มสิทธิ์
+    const addBtn = document.getElementById("addUserBtn");
+    const formadd = document.getElementById("Addform");
 
-//     // ถ้าเป็น Admin ให้โหลด dropdown
-//     if (window.userRole === "Admin") {
-//         document.getElementById("adminEditSection").style.display = "block";
+  if (!addBtn || !formadd) return;
 
-//         loadAdminDropdowns(problemData);
-//     } else {
-//         document.getElementById("adminEditSection").style.display = "none";
-//     }
-// }
+  addBtn.addEventListener("click", async (e) => {
+    e.preventDefault();
 
-// // ฟังก์ชันโหลด dropdown ของ admin
-//  function loadAdminDropdowns(problemData) {
-//   console.log("กำลังโหลด dropdowns...");
+    const firstname = document.getElementById("firstname").value.trim();
+    const lastname = document.getElementById("lastname").value.trim();
+    const department = document.getElementById("departmentDropdown").value;
+    const teamId = document.getElementById("teamDropdown").value;
+    const roleId = document.getElementById("roleDropdown").value;
+    const password = document.getElementById("password").value.trim();
+    const email = document.getElementById("email").value.trim();
 
-//   // 🔹 โหลดผู้รับผิดชอบ
-//   const assignDropdown = document.getElementById("assignDropdown");
-//   if (assignDropdown) {
-//     assignDropdown.innerHTML = ""; // เคลียร์ของเดิม
-//     const assignby = problemData.assignby;
-//     console.log(assignby);
-//     // axios.get("/main/assigned:problemId")
-//     //   .then(res => {
-//     //     const users = res.data;
-//     //     users.forEach(user => {
-//     //       const option = document.createElement("option");
-//     //       option.value = user.usersid;
-//     //       option.textContent = user.fullname;
-//     //       if (problemData.assignid == user.usersid) option.selected = true;
-//     //       assignDropdown.appendChild(option);
-//     //     });
-//     //     console.log("โหลดผู้รับผิดชอบสำเร็จ:", users);
-//     //   })
-//     //   .catch(err => console.error("โหลดผู้รับผิดชอบผิดพลาด:", err));
-//   }
+    if (!firstname || !lastname || !department || !teamId || !roleId || !password || !email) {
+      alert("กรุณากรอกข้อมูลให้ครบทุกช่อง");
+      return;
+    }
 
-//   // 🔹 โหลดสถานะ
-//   const statusDropdown = document.getElementById("statusDropdown");
-//   console.log("statusDropdown =", statusDropdown);
-//   if (statusDropdown) {
-//     let loadedstatus = false;
-//     statusDropdown.addEventListener("click", () => {
-//       if (loadedstatus) return;
+    try {
+      const res = await axios.post("/add-user", {
+        firstname,
+        lastname,
+        teamId,
+        roleId,
+        password,
+        email,
+      });
 
-//       axios.get("/main/status")
-//       .then(res => {
-//         const statuses = res.data;
-//         console.log(statuses);
-//         statuses.forEach(status => {
-//           const option = document.createElement("option");
-//           option.value = status.statusid;
-//           option.textContent = status.statusstate;
-//           // if (problemData.statusid == status.statusid) option.selected = true;
-//           statusDropdown.appendChild(option);
-//         });
-//         loadedstatus = true;
-//         console.log("โหลดสถานะสำเร็จ:", statuses);
-//       })
-//       .catch(err => console.error("โหลดสถานะผิดพลาด:", err));
-//     });
-//     loadedstatus();
-//     // statusDropdown.innerHTML = ""; // เคลียร์ของเดิม
-    
-//   }
-// }
-
-
-
-// // ปุ่มบันทึก admin
-// document.getElementById("saveAdminEdit").addEventListener("click", () => {
-//     if (!selectedProblemId) return alert("ไม่พบ Problem ID");
-
-//     const data = {
-//         problemid: selectedProblemId,
-//         assignid: document.getElementById("assignDropdown").value,
-//         statusid: document.getElementById("statusDropdown").value,
-//         priorityid: document.getElementById("priorityDropdown").value
-//     };
-
-//     axios.post("/main/admin/updateProblem", data)
-//         .then(res => {
-//             if(res.data.success){
-//                 alert("แก้ไขเรียบร้อย");
-//                 location.reload(); // หรือเรียก fetch table ใหม่
-//             } else {
-//                 alert("เกิดข้อผิดพลาด: " + res.data.message);
-//             }
-//         })
-//         .catch(err => {
-//             console.error(err);
-//             alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
-//         });
-// });
+      if (res.data.success) {
+        alert("เพิ่มข้อมูลสำเร็จ!");
+        formadd.reset();
+        window.location.href = "/main/admin";
+      } else {
+        alert("เพิ่มข้อมูลไม่สำเร็จ: " + res.data.message);
+      }
+    } catch (err) {
+      console.error("Error adding user:", err);
+      alert("เกิดข้อผิดพลาดในการเพิ่มข้อมูล");
+    }
+  });
 
 
 

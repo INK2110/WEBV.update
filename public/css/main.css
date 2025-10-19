@@ -446,6 +446,22 @@ body {
     color: #FCFAEE;
 }
 
+.btn-add {
+    background-color: #DA8359;
+    color: #FCFAEE;
+    padding: 15px 50px;
+    border: none;
+    border-radius: 3px;
+    font-size: 18px;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.btn-add:hover {
+    background-color: #DA8359;
+    color: #FCFAEE;
+}
+
 /* ===== Problems List Page Styles ===== */
 
 .page-header {

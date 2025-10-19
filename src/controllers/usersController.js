@@ -71,6 +71,40 @@ export const getUser = async (req, res) => {
   }
 };
 
+export const getAction = async (req, res) => {
+   try {
+    // ตรวจสอบ session
+    const userId = req.session?.user?.usersid;
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const result = await pool.query(`
+       SELECT 
+        u.usersid,
+        u.usersemail,
+        u.firstname,
+        u.lastname,
+        t.teamname,
+        d.departmentname,
+        u.phonenumber
+      FROM users u
+      LEFT JOIN teams t ON u.teamid = t.teamid
+      LEFT JOIN department d ON t.departmentid = d.departmentid
+    `);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    console.log(result.rows); 
+    return res.json(result.rows);
+
+  } catch (err) {
+    console.error("Database error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 // ดึง users ทั้งหมด
 export const getUsers = async (req, res) => {
   try {

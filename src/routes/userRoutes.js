@@ -1,8 +1,8 @@
 // src/routes/userRoutes.js
 import express from "express";
 import bodyParser from "body-parser";
-import { getUsers, getUser , getTechHome , getuserHome , getadminHome} from "../controllers/usersController.js";
-import {getMyHistory,getLatestWorkAssignment,updateProblem ,cancelWorkAssignment,getProblemlist ,getProblemlastest, getMyWorkAssignment ,getMyWorkHistory, addProblem, checkSession, getCategory, getPriority,getStatus,getAssignedUser, getDepartment,acceptWorkAssignment} from "../controllers/problemController.js";
+import { getUsers, getUser ,getAction, getTechHome , getuserHome , getadminHome} from "../controllers/usersController.js";
+import {getMyHistory,getLatestWorkAssignment,updateProblem ,cancelWorkAssignment,getProblemlist ,getProblemlastest, getMyWorkAssignment ,getMyWorkHistory, addProblem, checkSession, getCategory, getPriority,getStatus, getTeam,getRole, getDepartment,acceptWorkAssignment,adduser} from "../controllers/problemController.js";
 import { changePassword, login , logout } from "../controllers/authController.js";
 import { dirname } from "path";
 import path from "path";
@@ -66,6 +66,18 @@ router.get("/main/admin", requireAuth , (req,res) => {
   return res.sendFile(filePath);
 });
 
+router.get("/main/adminaction", requireAuth, (req,res) => {
+  const filePath = path.join(__dirname, "../../public/page/adminAction.html");
+    return res.sendFile(filePath);
+});
+
+router.get("/main/adminadd", requireAuth, (req,res) => {
+  const filePath = path.join(__dirname, "../../public/page/adminAdd.html");
+    return res.sendFile(filePath);
+});
+
+router.get("/main/adminaction", getAction);
+
 router.get("/main/users/data",requireAuth, getUser);
 
 router.get("/main/problemlist/data", requireAuth, getProblemlist);
@@ -74,7 +86,6 @@ router.get("/main/myWorkHistory/data",requireAuth,requireRole('Technician'), get
 router.get("/main/myWorkAssignment/data",requireAuth,requireRole('Technician'), getMyWorkAssignment);
 
 router.get("/main/problemlastest/data",requireAuth, getProblemlastest);
-
 
 router.get("/api/check-session", requireAuth, checkSession);
 
@@ -90,12 +101,12 @@ router.get("/main/priority" ,requireAuth,getPriority);
 //GET status
 router.get("/main/status" ,requireAuth,getStatus); 
 
-// ดึงชื่อผู้รับผิดชอบของปัญหา
-router.get("/main/assigned:problemId" ,requireAuth,requireRole('Admin'),getAssignedUser);
+router.get("/main/teams", requireAuth, getTeam);
 
+router.get("/main/role", requireAuth,getRole);
 // POST /api/add-problem
 router.post("/add-problem", requireAuth, addProblem);
-
+router.post("/add-user",requireAuth, adduser);
 
 
 router.post("/main/problem/accept/:id", requireAuth,requireRole('Technician'),acceptWorkAssignment);
