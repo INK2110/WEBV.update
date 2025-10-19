@@ -1,6 +1,7 @@
 console.log("🔍 กำลังโหลดข้อมูล /main/adminaction...");
 document.addEventListener('DOMContentLoaded',async () => {    
   let allData = [];
+  let user = null;
   
     const page_problem_Container = document.getElementById('page-problem-content');
     if(page_problem_Container) {
@@ -186,8 +187,6 @@ document.addEventListener('DOMContentLoaded',async () => {
     axios.get("/main/users/data")
       .then(res => {
         const data = res.data;
-        // เพิ่มมาใหม่
-        window.userRole = user.rolename; // <-- เพิ่มตรงนี้
         const lastestproblem = document.getElementById("lastestproblem");
         const datasection_home = document.getElementById("datasection_home");
         const el = document.getElementById("firstname");

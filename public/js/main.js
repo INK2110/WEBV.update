@@ -120,13 +120,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 
             });
 
-            axios.get(`/getAssignedUser/${data.problemId}`)
-            .then(res => {
-                 data.assignby = res.data;
-                // console.log(data23);
-            }).catch(error => {
-                console.log("Getting worker Error" , error);
-            })
+            // axios.get(`/getAssignedUser/${data.problemId}`)
+            // .then(res => {
+            //      data.assignby = res.data;
+            //     // console.log(data23);
+            // }).catch(error => {
+            //     console.log("Getting worker Error" , error);
+            // })
 
             
             
@@ -453,10 +453,10 @@ window.openProblemDetail = function(problemData) {
     if (!modalElement) return;
 
     // แสดง admin section
-    document.getElementById("adminEditSection").style.display = "block";
+    // document.getElementById("adminEditSection").style.display = "block";
 
     // โหลด dropdown ตอน modal เปิดแล้ว
-    loadAdminDropdowns(problemData);
+    // loadAdminDropdowns(problemData);
 
     const acceptBtn = document.getElementById("acceptButton");
     const workUpdatebtn = document.getElementById("workUpdatebtn");
